@@ -1,0 +1,5 @@
+name: BlockRevert
+main: xZeroMCPE\BlockRevert\BlockRevert
+api: [3.0.0]
+version: 1.0.0
+description: Revert
