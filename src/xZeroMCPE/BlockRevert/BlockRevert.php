@@ -89,6 +89,12 @@ class BlockRevert extends PluginBase implements Listener
 
         if (in_array($player->getLevel()->getName(), $this->config->get("Level to work on"))) {
             if (count($this->config->get('Affected blocks {Empty = all}')) == 0) {
+
+                foreach ($this->blockTicks as $index => $data){
+                    if($data['Location'] == $event->getBlock()->getX() . ":" . $event->getBlock()->getY() . ":" . $event->getBlock()->getZ()){
+                        return;
+                    }
+                }
                 $this->blockTicks[] = [
                     "Block" => $event->getBlockReplaced()->getId(),
                     "Damage" => $event->getBlock()->getDamage(),
@@ -98,6 +104,13 @@ class BlockRevert extends PluginBase implements Listener
                 ];
             } else {
                 if (in_array($event->getBlock()->getId(), $this->config->get("Affected blocks {Empty = all}"))) {
+
+                    foreach ($this->blockTicks as $index => $data){
+                        if($data['Location'] == $event->getBlock()->getX() . ":" . $event->getBlock()->getY() . ":" . $event->getBlock()->getZ()){
+                            return;
+                        }
+                    }
+
                     $this->blockTicks[] = [
                         "Block" => $event->getBlockReplaced()->getId(),
                         "Damage" => $event->getBlock()->getDamage(),
