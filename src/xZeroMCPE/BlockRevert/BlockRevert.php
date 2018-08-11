@@ -118,10 +118,10 @@ class BlockRevert extends PluginBase implements Listener
         if (in_array($player->getLevel()->getName(), $this->config->get("Level to work on"))) {
             if ($player->getInventory()->getItemInHand()->getId() == Item::BUCKET) {
                 $this->blockTicks[] = [
-                    "Block" => Block::get(0),
-                    "Damage" => $event->getBlock()->getDamage(),
+                    "Block" => 0,
+                    "Damage" => 0,
                     "Location" => $event->getTouchVector()->getX() . ":" . $event->getTouchVector()->getY() . ":" . $event->getTouchVector()->getZ(),
-                    "Level" => $event->getBlock()->getLevel()->getName(),
+                    "Level" => $player->getLevel()->getName(),
                     "Time" => $this->config->get("Interval in seconds")
                 ];
             }
