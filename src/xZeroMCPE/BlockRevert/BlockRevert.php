@@ -13,6 +13,7 @@ use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Listener;
+use pocketmine\math\Vector3;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\Task;
 use pocketmine\utils\Config;
@@ -31,6 +32,9 @@ class BlockRevert extends PluginBase implements Listener
 
         if (file_exists($this->getDataFolder() . "config.yml")) {
             $this->config = new Config($this->getDataFolder() . "config.yml", Config::YAML);
+            if($this->config->exists('Data')){
+                $this->blockTicks = json_decode($this->config->get("Data"), true);
+            }
         } else {
             $this->config = new Config($this->getDataFolder() . "config.yml", Config::YAML);
             $this->config->set("Interval in seconds", 10);
@@ -49,7 +53,9 @@ class BlockRevert extends PluginBase implements Listener
                         if($data['Time'] != 0){
                             BlockRevert::getInstance()->blockTicks[$index]['Time']--;
                         } else {
-                            BlockRevert::getInstance()->getServer()->getLevelByName($data['Level'])->setBlock($data['Location'], BlockFactory::get($data['Block'], $data['Damage']));
+                            $loc = explode(":", $data['Location']);
+                            BlockRevert::getInstance()->getServer()->getLevelByName($data['Level'])->setBlock(new Vector3((int) $loc[0], (int) $loc[1], (int) $loc[2]), BlockFactory::get($data['Block'], $data['Damage']));
+                            unset(BlockRevert::getInstance()->blockTicks[$index]);
                         }
                     }
                 }
@@ -60,6 +66,11 @@ class BlockRevert extends PluginBase implements Listener
 
     public function onDisable()
     {
+       if(count($this->blockTicks) != 0) {
+           $this->config->set('Data', json_encode($this->blockTicks, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+       } else {
+           $this->config->remove('Data');
+       }
         $this->config->save();
     }
 
@@ -76,7 +87,7 @@ class BlockRevert extends PluginBase implements Listener
                 $this->blockTicks[] = [
                     "Block" => $event->getBlockReplaced()->getId(),
                     "Damage" => $event->getBlock()->getDamage(),
-                    "Location" => $event->getBlock()->asVector3(),
+                    "Location" => $event->getBlock()->getX() . ":" . $event->getBlock()->getY() . ":" . $event->getBlock()->getZ(),
                     "Level" => $event->getBlock()->getLevel()->getName(),
                     "Time" => $this->config->get("Interval in seconds")
                 ];
@@ -85,7 +96,7 @@ class BlockRevert extends PluginBase implements Listener
                     $this->blockTicks[] = [
                         "Block" => $event->getBlockReplaced()->getId(),
                         "Damage" => $event->getBlock()->getDamage(),
-                        "Location" => $event->getBlock()->asVector3(),
+                        "Location" => $event->getBlock()->getX() . ":" . $event->getBlock()->getY() . ":" . $event->getBlock()->getZ(),
                         "Level" => $event->getBlock()->getLevel()->getName(),
                         "Time" => $this->config->get("Interval in seconds")
                     ];
